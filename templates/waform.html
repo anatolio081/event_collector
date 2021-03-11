@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block container %}
+
+    Введите данные из тестов и логов WA, где каждая строка = отдельное событие
+<form action="/eventwa" method="post">
+    <textarea rows="50" cols="220" name="myinput"></textarea>
+    <br/>
+    <input type="submit" value="Submit">
+
+{% endblock %}

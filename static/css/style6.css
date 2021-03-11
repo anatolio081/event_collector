@@ -1,0 +1,100 @@
+body {
+    background-color: #3b3f42;
+    color: #b7bbbc;
+    padding: 0.5rem;
+    font-size: 16px;
+    font-family: "Calibri (Body)"
+}
+
+#content::selection {
+    background-color: black;
+}
+span::selection{
+    background-color: black;
+}
+a {
+    color: #b7bbbc;
+    text-decoration: none;
+    background-color: #323336;
+    padding: 5px;
+	font-family: Helvetica;
+}
+
+.gen_element {
+    cursor: pointer;
+    padding: 3px;
+}
+
+.gen_element:hover {
+    cursor: pointer;
+    color: black;
+    background-color: beige;
+}
+
+.gen_element:focus {
+    cursor: pointer;
+    color: black;
+    background-color: beige;
+}
+#input {
+    display: none;
+}
+#input2 {
+    display: none;
+}
+
+#navigation {
+    margin-bottom: 12px;
+}
+
+#menu {
+    width: 19%;
+    border-style: solid;
+    border-color: #323336;
+    background-color: #323336;
+    overflow: scroll;
+    height: 850px;
+    float: left;
+    min-height: 30rem;
+    font-size: 0.8rem;
+    font-family: Helvetica
+}
+
+.content_container {
+    background-color: #2b2b2b;
+    width: 79%;
+    overflow: scroll;
+    height: 850px;
+    border-style: solid;
+    float: left;
+    min-height: 30rem;
+    font-size: 0.8rem;
+    line-height: 1.2;
+    font-family: 'Courier New'
+}
+
+pre {
+    font-size: 0.8rem;
+    padding: 5px;
+    margin: 5px;
+}
+
+.string {
+    color: #516144;
+}
+
+.number {
+    color: #7194b0;
+}
+
+.boolean {
+    color: #bb793f;
+}
+
+.null {
+    color: #bb793f;
+}
+
+.key {
+    color: #7f6882;
+}
