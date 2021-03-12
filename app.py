@@ -1,19 +1,32 @@
+from models.session import Session
 import os
 import json
+
 from flask import Flask, request, render_template, send_from_directory, json
+
 from event_collector import EventCollector
 from config_helper import load_settings
+from models import db
 
 config = load_settings("api_config.yaml")
 api_host = config["HOST"]
 api_port = config["PORT"]
 
-collector = EventCollector()
-collector.create_log_file()
+
+
 app = Flask(__name__)
+# конфиг базы
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+# инициализируем базу
+db.init_app(app)
+with app.app_context():
+    db.create_all()
+
+# инициализаруем базу
+collector = EventCollector(app)
+collector.create_log_file("manual")
 
 
-#
 @app.route("/", methods=['GET'])
 def hello():
     """
@@ -47,17 +60,10 @@ def render_events():
     показать веб-страницу с файлами логов
     :return:
     """
-    br_tag = " <br />"
-    output = "<head><link rel=\"stylesheet\" href=\"../static/css/style6.css\"></head><body>"
-    output += "<a href=\"/\">Главная</a>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp"
-    output += "<a href=\"/event_flush\">Стереть все логи</a>" + br_tag + br_tag
-    files = os.listdir("event_collector")
-    br_tag = " <br />"
+    sessions = Session.query.all() # можно сортонуть по времени
 
-    files.sort()
-    for i in files:
-        output += '<a href="http://' + api_host + ':' + api_port + '/event?filename=' + i + '">' + i + '</a>' + "\n" + br_tag + br_tag
-    return output
+    return render_template("sessionList.html",
+                           sessions=sessions)
 
 
 @app.route("/events_files_json", methods=['GET'])
@@ -81,15 +87,23 @@ def event():
     показать в юае все события в сессии файла-логов
     :return:
     """
-    filename = request.args.get('filename')
+    session = request.args.get('session')
+    
+    session = Session.query.get(session)
+
     br_tag = " <br />"
     output = ""
-    f = open('event_collector/' + filename, "r")
-    for i in f.readlines():
-        output += i + "@@@@"
+    filename = ""
+    #f = open('event_collector/' + filename, "r")
+    #for i in f.readlines():
+    #    output += i + "@@@@"
+
+    
+
     return render_template("show.html",
-                           output=output,
-                           file_name=filename)
+                            events=session.events,
+                            output=output,
+                            file_name=filename)
 
 
 @app.route("/eventwa", methods=['POST'])
@@ -148,9 +162,8 @@ def event_collect():
     Дописать новое событие в файл
     :return:
     """
-    print()
     content = request.json
-    collector.append_data(str(json.dumps(content, ensure_ascii=False)))
+    collector.append_data(content)
     return "ok"
 
 

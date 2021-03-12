@@ -2,17 +2,32 @@ import datetime
 import os
 import json
 
+from flask_sqlalchemy import SQLAlchemy
+from models.session import Session
+from models import db
+from models.event import Event
 
 class EventCollector:
+    db: SQLAlchemy
+    session: Session
 
-    def __init__(self):
+
+    def __init__(self, app):
         date = None
         date_of_last_file = None
+        self.session = None
+        self.app = app
+        
+       
+
 
     def get_files(self):
         """
         :return:возвращает словарь файлов
         """
+        print("asas")
+        print(Session.query.all())
+
         d={}
         files = os.listdir("event_collector")
         files.sort()
@@ -20,30 +35,37 @@ class EventCollector:
             d[i] = files[i]
         return d
 
-    def create_log_file(self):
+    def create_log_file(self, session_name: str):
         """
-        Создает файл с текущей датой до секунды в директории event_collector.
-        Если папки event_collector нет, то она будет создана.
-        :return:
+        Создаем сессию
         """
-        print(os.getcwd())
-        if os.path.isdir("event_collector"):
-            print("dir of collector is found")
-        else:
-            print("dir not found, creating event_collector dir")
-            os.mkdir("event_collector")
-        now = datetime.datetime.now()
-        self.date = now.strftime("%Y:%m:%d %H:%M:%S")
-        f = open('event_collector/' + self.date + ".txt", 'w')
-        f.close()
+        with self.app.app_context():
+            db.init_app(self.app)
+            self.session = Session(name=session_name)
+            db.session.add(self.session)
+            db.session.commit()
 
     def append_data(self, data):
         """
         Добавляет в файл data строку
+        data - json 
         """
-        f = open('event_collector/' + self.date + ".txt", 'a', encoding="utf-8")
-        f.write(data + '\n')
-        f.close()
+        with self.app.app_context():
+            db.init_app(self.app)
+            # итерируем эвенты по одному
+            for event in data['events']:
+                # и добавляем их в бд
+                ev = Event(
+                    time=datetime.datetime.fromtimestamp(
+                        event.get("timestamp", 0) / 1000
+                    ),
+                    event_id=event.get("event_id", ""),
+                    mac_address=event.get("mac_address", ""),
+                    session=self.session,
+                    json=json.dumps(event)
+                )
+                db.session.add(ev)
+                db.session.commit()
 
     def flush_data(self):
         """
@@ -54,7 +76,7 @@ class EventCollector:
         for f in file_list:
             os.remove("event_collector/" + f)
 
-    def get_json_from_file(self,name):
+    def get_json_from_file(self, name):
         """
         :param name:
         :return: возвращает словарь с вложением распершеных json

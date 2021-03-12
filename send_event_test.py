@@ -2,7 +2,7 @@ import requests
 import time
 import random
 
-url = "http://192.168.88.126:8081/event_collector"
+url = "http://127.0.0.1:5000/event_collector"
 dev_types = ["STB", "IPAD", "linux", "MAC"]
 event_ids = ["watching_cats", "watching_porn", "watching_metal_concert"]
 mac_adresses=["aa:bb:aa:f0:d4:34","bb:4c:4d:f0:d4:34","cc:4c:4d:f0:d4:34","dd:4c:4d:f0:d4:34"]
@@ -15,7 +15,7 @@ for i in range(0, 100):
                 "event_id": random.choice(event_ids),
                 "event_version": 1,
                 "mac_address": random.choice(mac_adresses),
-                "timestamp": time.time(),
+                "timestamp": time.time() * 1000,
                 "group_of_metrics": {
                     "metric_one": random.randint(1, 100),
                     "metric_two": random.randint(1, 100),

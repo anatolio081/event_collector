@@ -98,3 +98,13 @@ pre {
 .key {
     color: #7f6882;
 }
+
+
+.sessions{
+    list-style: none;
+    padding: 0px;
+}
+
+.sessions li{
+    margin: 15px;
+}

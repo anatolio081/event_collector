@@ -20,6 +20,11 @@
 </div>
 
 <div id="menu">
+    <ul>
+        {% for event in events%}
+            <li> {{ event }} </li>
+        {% endfor %}
+    </ul>
 </div>
 
 <div class="content_container">

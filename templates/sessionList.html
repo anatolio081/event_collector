@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block container %}
+    <ul class="sessions">
+        {% for session in sessions %}
+            <li>
+                <a href="/event?session={{ session.id }} ">{{ session }}</a><br>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}
