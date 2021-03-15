@@ -3,6 +3,7 @@
 *.db
 .idea
 event_collector/
+coverage/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

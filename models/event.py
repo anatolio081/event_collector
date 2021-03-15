@@ -1,4 +1,4 @@
-from .base import db
+from .base import db, dump_datetime
 from datetime import datetime, time
 
 class Event(db.Model):
@@ -14,6 +14,17 @@ class Event(db.Model):
     session = db.relationship('Session',
         backref=db.backref('events', lazy=True))
 
+
+    @property
+    def serialize(self):
+       """Return object data in easily serializable format"""
+       return {
+           'id'         : self.id,
+           'time': dump_datetime(self.time),
+           'event_id'  : self.event_id,
+           'mac_address'  : self.mac_address,
+           'json'  : self.json
+       }
 
     def __repr__(self):
         return f'<Event {self.event_id} {self.time}>' 

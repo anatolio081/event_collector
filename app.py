@@ -1,8 +1,8 @@
 from models.session import Session
-import os
 import json
 
 from flask import Flask, request, render_template, send_from_directory, json
+from flask_cors import CORS
 
 from event_collector import EventCollector
 from config_helper import load_settings
@@ -12,11 +12,11 @@ config = load_settings("api_config.yaml")
 api_host = config["HOST"]
 api_port = config["PORT"]
 
-
-
 app = Flask(__name__)
+cors = CORS(app)
 # конфиг базы
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+app.config['CORS_HEADERS'] = 'Content-Type'
 # инициализируем базу
 db.init_app(app)
 with app.app_context():
@@ -25,15 +25,6 @@ with app.app_context():
 # инициализаруем базу
 collector = EventCollector(app)
 collector.create_log_file("manual")
-
-
-@app.route("/", methods=['GET'])
-def hello():
-    """
-    Главная страница
-    """
-    return render_template("index.html")
-
 
 @app.route("/new_log", methods=['GET'])
 def new_log():
@@ -66,6 +57,16 @@ def render_events():
                            sessions=sessions)
 
 
+@app.route("/api/sessions", methods=['GET'])
+def api_sessions():
+    """
+    показать веб-страницу с файлами логов
+    :return:
+    """
+    sessions = Session.query.all() # можно сортонуть по времени
+    
+    return json.jsonify([i.serialize for i in sessions])
+
 @app.route("/events_files_json", methods=['GET'])
 def events_raw():
     """
@@ -90,21 +91,24 @@ def event():
     session = request.args.get('session')
     
     session = Session.query.get(session)
-
-    br_tag = " <br />"
     output = ""
     filename = ""
-    #f = open('event_collector/' + filename, "r")
-    #for i in f.readlines():
-    #    output += i + "@@@@"
-
-    
 
     return render_template("show.html",
                             events=session.events,
                             output=output,
                             file_name=filename)
 
+@app.route("/api/events", methods=['GET'])
+def api_events():
+    """
+    показать в юае все события в сессии файла-логов
+    :return:
+    """
+    session = request.args.get('session')
+    session = Session.query.get(session)
+
+    return json.jsonify([i.serialize for i in session.events])
 
 @app.route("/eventwa", methods=['POST'])
 def eventwa():
@@ -166,6 +170,16 @@ def event_collect():
     collector.append_data(content)
     return "ok"
 
+
+@app.route('/assets/<path:path>')
+def send_static(path):
+    return send_from_directory('frontend/dist/assets/', path)
+
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    return send_from_directory("frontend/dist/", "index.html")
 
 if __name__ == "__main__":
     app.run(host=api_host, port=api_port, debug=False)

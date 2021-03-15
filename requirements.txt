@@ -3,3 +3,4 @@ flask
 PyYAML
 mountepy
 Flask-SQLAlchemy
+flask-cors
