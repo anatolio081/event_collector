@@ -1,13 +1,36 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./App.css";
 import Sidebar from "./components/Sidebar";
 import TopMenu from "./pages/Events/TopMenu";
 import Events from "./pages/Events/Event";
-
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import Sessions from "./pages/Sessions/Sessions";
 
+import { useAppDispatch } from "./store/hooks";
+import { setSession } from "./store/session";
+import { SessionModel } from "./models/Session";
+import socket, { SocketData } from "./socket";
+
 function App() {
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    socket.on("connect_error", (err) => {
+      console.log(`connect_error due to ${err.message}`, err);
+    });
+    socket.off("message");
+    socket.on("message", function (data: SocketData) {
+      if ((data.type = "current_session")) {
+        const { id, name, created_at, events } = data.data;
+        dispatch(setSession(new SessionModel(id, name, created_at, events)));
+      }
+    });
+    socket.connect();
+
+    return () => {
+      socket.off("message");
+    };
+  }, []);
+
   return (
     <Router>
       <div className="bg-gray-900 text-white h-screen flex overflow-hidden text-sm">
@@ -15,7 +38,6 @@ function App() {
 
         <div className="flex-grow overflow-hidden h-full flex flex-col">
           <TopMenu></TopMenu>
-
           <Switch>
             <Route path="/sessions/:id" component={Events}></Route>
             <Route path="/" component={Sessions}></Route>

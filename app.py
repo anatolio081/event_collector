@@ -1,4 +1,5 @@
 from models.session import Session
+from models.event import Event
 import json
 
 from flask import Flask, request, render_template, send_from_directory, json
@@ -7,6 +8,8 @@ from flask_cors import CORS
 from event_collector import EventCollector
 from config_helper import load_settings
 from models import db
+from flask_socketio import SocketIO, emit, join_room, leave_room, send, rooms
+
 
 config = load_settings("api_config.yaml")
 api_host = config["HOST"]
@@ -14,9 +17,12 @@ api_port = config["PORT"]
 
 app = Flask(__name__)
 cors = CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 # конфиг базы
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 app.config['CORS_HEADERS'] = 'Content-Type'
+
+
 # инициализируем базу
 db.init_app(app)
 with app.app_context():
@@ -26,13 +32,52 @@ with app.app_context():
 collector = EventCollector(app)
 collector.create_log_file("manual")
 
+
+@socketio.on('join')
+def on_join(room):
+    join_room(room, sid=request.sid)
+
+
+@socketio.on('leave')
+def on_leave(room):
+    leave_room(room, sid=request.sid)
+
+
+@socketio.on('disconnect')
+def on_disconect():
+    print(rooms(request.sid))
+
+
+@socketio.on('connect')
+def connect():
+    join_room("current_session", sid=request.sid)
+    session = Session.query.get(collector.get_session_id())
+    emit('message', {"type": "current_session",
+                     'data': session.serialize})
+
+
 @app.route("/new_log", methods=['GET'])
 def new_log():
     """
     создать новый файл для логов
     :return:
     """
-    collector.create_log_file()
+    collector.create_log_file("manul_front")
+    return "created"
+
+
+@app.route("/api/newsession", methods=['GET'])
+def api_new_session():
+    """
+    создать новый файл для логов
+    :return:
+    """
+    session = collector.create_log_file("manul_front")
+    session = Session.query.get(session)
+    send({
+        "type": "current_session",
+        "data": session.serialize
+    }, json=True, room="current_session", namespace="/")
     return "created"
 
 
@@ -51,7 +96,7 @@ def render_events():
     показать веб-страницу с файлами логов
     :return:
     """
-    sessions = Session.query.all() # можно сортонуть по времени
+    sessions = Session.query.all()  # можно сортонуть по времени
 
     return render_template("sessionList.html",
                            sessions=sessions)
@@ -63,9 +108,19 @@ def api_sessions():
     показать веб-страницу с файлами логов
     :return:
     """
-    sessions = Session.query.all() # можно сортонуть по времени
-    
+    sessions = Session.query.order_by(
+        Session.created_at.desc()).all()  # можно сортонуть по времени
     return json.jsonify([i.serialize for i in sessions])
+
+
+@app.route("/api/current_session", methods=['GET'])
+def api_current_sessions():
+    """
+    показать веб-страницу с файлами логов
+    :return:
+    """
+    return json.jsonify(collector.session.serialize)
+
 
 @app.route("/events_files_json", methods=['GET'])
 def events_raw():
@@ -82,23 +137,6 @@ def events_raw():
     return response
 
 
-@app.route("/event", methods=['GET'])
-def event():
-    """
-    показать в юае все события в сессии файла-логов
-    :return:
-    """
-    session = request.args.get('session')
-    
-    session = Session.query.get(session)
-    output = ""
-    filename = ""
-
-    return render_template("show.html",
-                            events=session.events,
-                            output=output,
-                            file_name=filename)
-
 @app.route("/api/events", methods=['GET'])
 def api_events():
     """
@@ -109,19 +147,6 @@ def api_events():
     session = Session.query.get(session)
 
     return json.jsonify([i.serialize for i in session.events])
-
-@app.route("/eventwa", methods=['POST'])
-def eventwa():
-    """
-    показать в юае все события в сессии файла-логов
-    :return:
-    """
-    output = str()
-    inp_text = request.form['myinput'].split("\n")
-    for i in inp_text:
-        output += i + "@@@@"
-    return render_template("showWa.html",
-                           output=output)
 
 
 @app.route("/event_flush", methods=['GET'])
@@ -167,7 +192,12 @@ def event_collect():
     :return:
     """
     content = request.json
-    collector.append_data(content)
+    ids = collector.append_data(content)
+    events = Event.query.filter(Event.id.in_(ids)).all()
+    session_id = collector.get_session_id()
+    data = {"type": "new_events",
+            'data': [i.serialize for i in events]}
+    send(data, room=f"new_events_{session_id}", json=True, namespace="/",)
     return "ok"
 
 
@@ -181,5 +211,6 @@ def send_static(path):
 def catch_all(path):
     return send_from_directory("frontend/dist/", "index.html")
 
+
 if __name__ == "__main__":
-    app.run(host=api_host, port=api_port, debug=False)
+    socketio.run(app, host=api_host, port=api_port, debug=True)

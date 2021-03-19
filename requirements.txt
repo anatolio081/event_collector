@@ -4,3 +4,4 @@ PyYAML
 mountepy
 Flask-SQLAlchemy
 flask-cors
+Flask-SocketIO

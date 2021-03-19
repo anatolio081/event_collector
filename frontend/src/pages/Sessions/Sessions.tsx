@@ -12,6 +12,8 @@ interface MatchParams {}
 interface EventsStateProps extends RouteComponentProps<MatchParams> {}
 
 class Sessions extends Component<EventsStateProps, EventsState> {
+  // highlight-next-line
+
   constructor(props: any) {
     super(props);
     this.state = { sessions: [] };
@@ -36,7 +38,7 @@ class Sessions extends Component<EventsStateProps, EventsState> {
                     key={`session-item-${index}`}
                   >
                     <div className="flex xl:flex-row flex-col items-center font-medium text-white pb-2 mb-2 xl:border-b border-opacity-75 border-gray-700 w-full">
-                      {session.name}
+                      {`${session.name} / Events: ${session.events}`}
                     </div>
                     <div className="flex items-center w-full">
                       <div className="text-xs py-1 px-2 leading-none bg-gray-900 text-blue-500 rounded-md">

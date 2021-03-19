@@ -1,15 +1,12 @@
-import React, { Component } from "react";
+import React, { useEffect, useState } from "react";
 import ReactJson from "react-json-view";
 import EventsPrev from "./EventsPrev";
 
 import { EventModel } from "../../models/Events";
-
-type EventsState = {
-  events: Array<EventModel>;
-  selectEvent: EventModel | null;
-};
-
 import { RouteComponentProps } from "react-router";
+import { useParams } from "react-router-dom";
+import socket, { SocketData } from "../../socket";
+import { useAppSelector } from "../../store/hooks";
 
 interface MatchParams {
   id: string | undefined;
@@ -17,60 +14,102 @@ interface MatchParams {
 
 interface EventsStateProps extends RouteComponentProps<MatchParams> {}
 
-class Events extends Component<EventsStateProps, EventsState> {
-  sessionId: number;
+function Events() {
+  const session = useAppSelector((state) => state.session.value);
+  const [events, setEvents] = useState<EventModel[]>([]);
+  const [selectEvent, setSelectEvent] = useState<EventModel | null>(null);
+  const { id } = useParams<MatchParams>();
+  const sessionId = id ? parseInt(id) : 0;
+  let watchEvents: boolean | string = false;
 
-  jsonPrev = () => {
-    if (this.state.selectEvent) {
-      const temp = this.state.selectEvent;
+  const eventsIDs = new Set();
+
+  useEffect(() => {
+    initData();
+    if (watchEvents) {
+      socket.emit("leave", watchEvents);
+      watchEvents = false;
+    }
+    if (session && session.id === sessionId) {
+      watchEvents = `new_events_${sessionId}`;
+      socket.emit("join", watchEvents);
+    }
+    return () => {
+      socket.emit("leave", watchEvents);
+      console.log(socket);
+      socket.off("json");
+    };
+  }, [id]);
+
+  socket.off("json");
+
+  socket.on("json", function (data: SocketData) {
+    console.log(data);
+    if ((data.type = "new_events")) {
+      for (let item of data.data) {
+        if (!eventsIDs.has(item.id)) {
+          eventsIDs.add(item.id);
+
+          setEvents([
+            ...events,
+            new EventModel(
+              item.id,
+              item.event_id,
+              item.json,
+              item.mac_address,
+              item.time
+            ),
+          ]);
+        }
+      }
+    }
+  });
+
+  // init data
+  const initData = async () => {
+    eventsIDs.clear();
+    setSelectEvent(null);
+    const data = await EventModel.getList({
+      session: sessionId,
+    });
+    for (let event of data) {
+      eventsIDs.add(event.id);
+    }
+    setEvents(data);
+  };
+
+  const jsonPrev = () => {
+    if (selectEvent) {
+      const temp = selectEvent;
       return JSON.parse(temp.json);
     }
     return {};
   };
 
-  constructor(props: any) {
-    super(props);
-    this.sessionId = 0;
-    if (this.props.match.params.id) {
-      this.sessionId = parseInt(this.props.match.params.id);
-    }
-    this.state = { events: [], selectEvent: null };
-  }
-
-  async componentDidMount() {
-    const data = await EventModel.getList({
-      session: this.sessionId,
-    });
-    this.setState({ events: data });
-  }
-
-  selectEvent = (event: EventModel) => {
-    this.setState({
-      selectEvent: event,
-    });
+  const selectEventCallback = (event: EventModel) => {
+    setSelectEvent(event);
   };
 
-  render() {
-    return (
-      <div className="flex-grow flex overflow-x-hidden">
-        <EventsPrev
-          events={this.state.events}
-          selectEvent={this.selectEvent}
-        ></EventsPrev>
+  return (
+    <div className="flex-grow flex overflow-x-hidden">
+      <EventsPrev
+        events={events}
+        selectEvent={selectEventCallback}
+        currentSession={sessionId}
+      ></EventsPrev>
 
-        <div className="flex-grow bg-gray-900 overflow-y-auto event-json-wraper">
-          <div className="sm:p-7 p-4 ">
-            <ReactJson
-              src={this.jsonPrev()}
-              theme="tomorrow"
-              displayDataTypes={false}
-              name={false}
-            />
-          </div>
+      <div className="flex-grow bg-gray-900 overflow-y-auto event-json-wraper">
+        <div className="sm:p-7 p-4 ">
+          <ReactJson
+            src={jsonPrev()}
+            theme="tomorrow"
+            displayDataTypes={false}
+            name={false}
+          />
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }
 export default Events;
 

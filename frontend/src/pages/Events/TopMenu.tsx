@@ -1,59 +1,66 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
+import { useAppSelector } from "../../store/hooks";
 
-type TopMenuState = {
-  menus: Array<{
-    title: string;
-    state: boolean;
-    to: string;
-  }>;
-};
+type TopMenuList = Array<{
+  title: string;
+  state: boolean;
+  to: string;
+}>;
 
-class TopMenu extends Component<{}, TopMenuState> {
-  initState() {
-    this.setState({
-      menus: [
-        {
-          title: "Sessions",
-          state: true,
-          to: "/",
-        },
-      ],
-    });
-  }
+function TopMenu() {
+  const session = useAppSelector((state) => state.session.value);
 
-  componentWillMount() {
-    this.initState();
-  }
+  const menus: TopMenuList = [
+    {
+      title: "Sessions",
+      state: true,
+      to: "/",
+    },
+  ];
 
-  render() {
-    return (
-      <div className="h-16 lg:flex w-full border-b border-gray-800 hidden px-10">
-        <div className="flex h-full text-gray-400">
-          {this.state.menus.map((value, index) => {
-            let deactiveClass =
-              "cursor-pointer h-full border-b-2 border-transparent inline-flex items-center mr-8";
-            let activeClass =
-              "cursor-pointer h-full border-b-2 text-white border-white inline-flex mr-8 items-center";
-            return (
-              <Link
-                to={value.to}
-                key={`item-${index}`}
-                className={value.state ? activeClass : deactiveClass}
-              >
-                {value.title}
-              </Link>
-            );
-          })}
-        </div>
-        <div className="ml-auto flex items-center space-x-7">
-          <button className="h-8 px-3 rounded-md shadow text-white bg-blue-500">
-            Button
-          </button>
-        </div>
+  return (
+    <div className="h-16 lg:flex w-full border-b border-gray-800 hidden px-10">
+      <div className="flex h-full text-gray-400">
+        {menus.map((value, index) => {
+          let deactiveClass =
+            "cursor-pointer h-full border-b-2 border-transparent inline-flex items-center mr-8";
+          let activeClass =
+            "cursor-pointer h-full border-b-2 text-white border-white inline-flex mr-8 items-center";
+          return (
+            <Link
+              to={value.to}
+              key={`item-${index}`}
+              className={value.state ? activeClass : deactiveClass}
+            >
+              {value.title}
+            </Link>
+          );
+        })}
       </div>
-    );
-  }
+      <div className="ml-auto flex items-center space-x-7">
+        {session == null ? (
+          <p>Нет сесси</p>
+        ) : (
+          <p className="p-2 rounded-md bg-gray-800 shadow">
+            Текущая сессия:
+            <Link to={`/sessions/${session.id}`} className="text-blue-500">
+              {`
+              ${session.name} /
+              ${session.created_at
+                .setLocale("ru")
+                .toFormat("dd LLL yyyy HH:mm:ss")}
+                `}
+            </Link>
+          </p>
+        )}
+
+        <button className="h-8 px-3 rounded-md shadow text-white bg-blue-500">
+          Новая сессия
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export default TopMenu;
