@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import CCheckBox from "../../components/Forms/CCheckBox";
 import CSelect from "../../components/Forms/CSelect";
 import { EventModel } from "../../models/Events";
 import { useAppSelector } from "../../store/hooks";
+import { EventPrevItem, EventPrevItemCompact } from "./EventPrevItem";
 
 type EventsPrevProps = {
   events: Array<EventModel>;
@@ -14,6 +16,7 @@ type ListItem = Array<{ value: string | number; name: string }>;
 function EventsPrev(props: EventsPrevProps) {
   const session = useAppSelector((state) => state.session.value);
 
+  const [compactView, setCompactView] = useState(true);
   const [selectId, setSelectId] = useState(0);
   const [filter, setFilter] = useState({
     event_id: null,
@@ -65,22 +68,28 @@ function EventsPrev(props: EventsPrevProps) {
     }, cummulitive);
   };
 
-  const filterEvents = () => {
+  const filterEvents = useMemo(() => {
     return props.events.filter((item) => {
       return (
         (filter.event_id === null || filter.event_id == item.event_id) &&
         (filter.mac_address === null || filter.mac_address == item.mac_address)
       );
     });
-  };
-
-  //eventIdList = () => {};
-
+  }, [props.events, filter]);
   return (
-    <div className="xl:w-72 w-48 flex-shrink-0 border-r border-gray-800 h-full overflow-y-auto lg:block hidden p-5">
+    <div className="xl:w-96 w-72 flex-shrink-0 border-r border-gray-800 h-full overflow-y-auto lg:block hidden p-5">
       <div className="flex items-center w-full">
         <div className="text-xs text-gray-400 tracking-wider pr-2">EVENTS:</div>
         {props.events.length}
+        <div className="ml-auto">
+          <CCheckBox
+            value={compactView}
+            label="Компактно"
+            callBack={(value: boolean) => {
+              setCompactView(value);
+            }}
+          />
+        </div>
         <div className="ml-auto">
           {session !== null && session.id == props.currentSession ? (
             <div className="text-xs py-1 px-2 leading-none bg-gray-800 text-green-500 rounded-md">
@@ -98,8 +107,10 @@ function EventsPrev(props: EventsPrevProps) {
           items={eventsID()}
           label="Event ID"
           callBack={(value: any) => {
-            filter.event_id = value;
-            setFilter(filter);
+            setFilter((prevState) => ({
+              ...prevState,
+              event_id: value,
+            }));
           }}
         />
         <div className="mt-2">
@@ -107,14 +118,16 @@ function EventsPrev(props: EventsPrevProps) {
             items={macList()}
             label="MAC"
             callBack={(value: any) => {
-              filter.mac_address = value;
-              setFilter(filter);
+              setFilter((prevState) => ({
+                ...prevState,
+                mac_address: value,
+              }));
             }}
           />
         </div>
       </div>
 
-      {filterEvents().map((value, index) => {
+      {filterEvents.map((value, index) => {
         let deactiveClass =
           "p-3 mt-3 w-full flex flex-col rounded-md bg-gray-800 shadow";
         let activeClass =
@@ -127,17 +140,11 @@ function EventsPrev(props: EventsPrevProps) {
             className={value.id == selectId ? activeClass : deactiveClass}
             key={`event-prev-${value.id}`}
           >
-            <div className="flex xl:flex-row flex-col items-center font-medium text-white pb-2 mb-2 xl:border-b border-opacity-75 border-gray-700 w-full">
-              {value.event_id}
-            </div>
-            <div className="flex items-center w-full">
-              <div className="text-xs py-1 px-2 leading-none bg-gray-900 text-blue-500 rounded-md">
-                {value.time.toFormat("HH:mm:ss")}
-              </div>
-              <div className="ml-auto text-xs text-gray-500">
-                {value.mac_address}
-              </div>
-            </div>
+            {compactView ? (
+              <EventPrevItemCompact item={value} />
+            ) : (
+              <EventPrevItem item={value} />
+            )}
           </button>
         );
       })}

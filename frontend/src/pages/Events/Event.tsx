@@ -36,7 +36,6 @@ function Events() {
     }
     return () => {
       socket.emit("leave", watchEvents);
-      console.log(socket);
       socket.off("json");
     };
   }, [id]);
@@ -44,7 +43,6 @@ function Events() {
   socket.off("json");
 
   socket.on("json", function (data: SocketData) {
-    console.log(data);
     if ((data.type = "new_events")) {
       for (let item of data.data) {
         if (!eventsIDs.has(item.id)) {
@@ -81,9 +79,11 @@ function Events() {
   const jsonPrev = () => {
     if (selectEvent) {
       const temp = selectEvent;
-      return JSON.parse(temp.json);
+      return {
+        events: [JSON.parse(temp.json)],
+      };
     }
-    return {};
+    return ["Событие не выбрано"];
   };
 
   const selectEventCallback = (event: EventModel) => {

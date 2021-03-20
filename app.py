@@ -66,18 +66,19 @@ def new_log():
     return "created"
 
 
-@app.route("/api/newsession", methods=['GET'])
+@app.route("/api/newsession", methods=['POST'])
 def api_new_session():
     """
     создать новый файл для логов
     :return:
     """
+    print(request.data)
     session = collector.create_log_file("manul_front")
     session = Session.query.get(session)
     send({
         "type": "current_session",
         "data": session.serialize
-    }, json=True, room="current_session", namespace="/")
+    }, room="current_session", namespace="/")
     return "created"
 
 

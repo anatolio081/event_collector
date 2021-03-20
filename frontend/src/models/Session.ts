@@ -31,4 +31,11 @@ export class SessionModel {
             return new SessionModel(id, name, created_at, events);
         })
     }
+
+    static async createNew(name = "manual_front") {
+        let data = await axiosInstance.post("/newsession", {
+            session_name: name
+        })
+
+    }
 }

@@ -1,6 +1,7 @@
-import React, { Component } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector } from "../../store/hooks";
+import NewSession from "../../components/Controls/NewSession";
 
 type TopMenuList = Array<{
   title: string;
@@ -54,10 +55,7 @@ function TopMenu() {
             </Link>
           </p>
         )}
-
-        <button className="h-8 px-3 rounded-md shadow text-white bg-blue-500">
-          Новая сессия
-        </button>
+        <NewSession />
       </div>
     </div>
   );
