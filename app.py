@@ -1,3 +1,4 @@
+from datetime import datetime
 from models.session import Session
 from models.event import Event
 import json
@@ -72,8 +73,8 @@ def api_new_session():
     создать новый файл для логов
     :return:
     """
-    print(request.data)
-    session = collector.create_log_file("manul_front")
+    name = request.json.get("session_name", "manul_front")
+    session = collector.create_log_file(name)
     session = Session.query.get(session)
     send({
         "type": "current_session",
@@ -109,9 +110,22 @@ def api_sessions():
     показать веб-страницу с файлами логов
     :return:
     """
-    sessions = Session.query.order_by(
+    sessions = Session.query.filter(Session.deleted_at.is_(None)).order_by(
         Session.created_at.desc()).all()  # можно сортонуть по времени
     return json.jsonify([i.serialize for i in sessions])
+
+
+@app.route("/api/sessions/<int:session_id>", methods=['DELETE'])
+def api_sessions_del(session_id):
+    """
+    показать веб-страницу с файлами логов
+    :return:
+    """
+    session = Session.query.get(session_id)
+    session.deleted_at = datetime.now()
+    db.session.add(session)
+    db.session.commit()
+    return ("", 204)
 
 
 @app.route("/api/current_session", methods=['GET'])

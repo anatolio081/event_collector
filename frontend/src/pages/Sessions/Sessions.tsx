@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { RouteComponentProps } from "react-router";
 import { Link } from "react-router-dom";
+import CButton from "../../components/Forms/CButton";
 import { SessionModel } from "../../models/Session";
 
 type EventsState = {
@@ -24,6 +25,12 @@ class Sessions extends Component<EventsStateProps, EventsState> {
     this.setState({ sessions: data });
   }
 
+  async deleteSession(id: number, index: number) {
+    await SessionModel.delete(id);
+    this.state.sessions.splice(index, 1);
+    this.setState({ sessions: this.state.sessions });
+  }
+
   render() {
     return (
       <div className="flex-grow flex overflow-x-hidden">
@@ -41,10 +48,21 @@ class Sessions extends Component<EventsStateProps, EventsState> {
                       {`${session.name} / Events: ${session.events}`}
                     </div>
                     <div className="flex items-center w-full">
-                      <div className="text-xs py-1 px-2 leading-none bg-gray-900 text-blue-500 rounded-md">
+                      <div className="text-xs py-1 px-2 leading-none bg-gray-900  text-blue-500 rounded-md">
                         {session.created_at
                           .setLocale("ru")
                           .toFormat("dd LLL yyyy HH:mm:ss")}
+                      </div>
+                      <div className="ml-auto">
+                        <CButton
+                          color="bg-red-500"
+                          onClick={(event: React.MouseEvent<HTMLElement>) => {
+                            this.deleteSession(session.id, index);
+                            event.preventDefault();
+                          }}
+                        >
+                          Удалить
+                        </CButton>
                       </div>
                     </div>
                   </Link>

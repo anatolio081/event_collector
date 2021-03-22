@@ -36,6 +36,9 @@ export class SessionModel {
         let data = await axiosInstance.post("/newsession", {
             session_name: name
         })
+    }
 
+    static async delete(id: number) {
+        let data = await axiosInstance.delete(`/sessions/${id}`);
     }
 }
