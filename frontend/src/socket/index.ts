@@ -5,7 +5,7 @@ export type SocketData = {
     data: any;
 };
 
-const manager = new Manager("ws://localhost:5000", {
+const manager = new Manager("ws://192.168.88.126:5000", {
     reconnectionDelayMax: 10000,
     reconnection: true,
     query: {

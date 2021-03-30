@@ -13,3 +13,7 @@ pip install -r requirements.txt
 sleep 1
 echo "######## Deactivating envoriment  #########"
 deactivate
+echo "######## installing frontend ##########"
+cd frontend
+npm run build
+cd ..

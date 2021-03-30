@@ -2,7 +2,7 @@ import requests
 import time
 import random
 
-url = "http://127.0.0.1:5000/event_collector"
+url = "http://192.168.88.126:5000/event_collector"
 dev_types = ["STB", "IPAD", "linux", "MAC"]
 event_ids = ["watching_cats", "watching_porn", "watching_metal_concert"]
 mac_adresses=["aa:bb:aa:f0:d4:34","bb:4c:4d:f0:d4:34","cc:4c:4d:f0:d4:34","dd:4c:4d:f0:d4:34"]
