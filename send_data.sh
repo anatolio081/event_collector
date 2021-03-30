@@ -1,1 +1,1 @@
-python3 send_event_test.py
+python3 send_event_test.py & python3 send_event_test.py
