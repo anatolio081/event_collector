@@ -15,5 +15,6 @@ echo "######## Deactivating envoriment  #########"
 deactivate
 echo "######## installing frontend ##########"
 cd frontend
+npm install
 npm run build
 cd ..
