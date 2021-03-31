@@ -19,9 +19,6 @@ class EventCollector:
         """
         :return:возвращает словарь файлов
         """
-        print("asas")
-        print(Session.query.all())
-
         d = {}
         files = os.listdir("event_collector")
         files.sort()
@@ -44,17 +41,17 @@ class EventCollector:
 
     def get_session_id(self):
         return self.cached_session_id
-            
 
     def append_data(self, data):
         """
         Добавляет в файл data строку
         data - json 
         """
+        events_ids = []
+
         with self.app.app_context():
             # db.init_app(self.app) # иногда работает без неё иногда с ней
             # итерируем эвенты по одному
-            events_ids = []
             for event in data['events']:
                 # и добавляем их в бд
                 ev = Event(
@@ -63,13 +60,14 @@ class EventCollector:
                     ),
                     event_id=event.get("event_id", ""),
                     mac_address=event.get("mac_address", ""),
-                    session=self.session,
+                    session_id=self.session.id,
                     json=json.dumps(event)
                 )
                 db.session.add(ev)
                 db.session.commit()
                 events_ids.append(ev.id)
-            return events_ids
+
+        return events_ids
 
     def flush_data(self):
         """

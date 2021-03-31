@@ -21,8 +21,9 @@ cors = CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 # конфиг базы
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+app.config['SQLALCHEMY_ECHO'] = False
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['CORS_HEADERS'] = 'Content-Type'
-
 
 # инициализируем базу
 db.init_app(app)
