@@ -4,14 +4,15 @@ import "./CCheckBox.css";
 type CCheckBoxProps = {
   label: string;
   value: boolean;
+  className?: string;
   callBack: Function;
 };
 
 function CCheckBox(props: CCheckBoxProps) {
-  const { label = "Label", value = false } = props;
+  const { label = "Label", value = false, className = "" } = props;
 
   return (
-    <label className="flex justify-start items-start ccheckbox">
+    <label className={`flex justify-start items-start ccheckbox ${className}`}>
       <div className="bg-transparent border-2 rounded border-gray-400 w-6 h-6 flex flex-shrink-0 justify-center items-center mr-2 focus-within:border-blue-500">
         <input
           type="checkbox"

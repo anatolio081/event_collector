@@ -1,12 +1,16 @@
 import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 import { SessionModel } from "../../models/Session";
 import CButton from "../Forms/CButton";
 
 function NewSession() {
+  const history = useHistory();
+
   const [sessionName, setSessionName] = useState("manual");
 
   const createNewSession = async () => {
-    await SessionModel.createNew(sessionName);
+    const session = await SessionModel.createNew(sessionName);
+    history.push(`/sessions/${session.id}`);
     setSessionName("manual");
   };
 

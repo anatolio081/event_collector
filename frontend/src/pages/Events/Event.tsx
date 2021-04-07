@@ -99,7 +99,7 @@ function Events() {
       ></EventsPrev>
 
       <div className="flex-grow bg-gray-900 overflow-y-auto event-json-wraper">
-        <div className="sm:p-7 p-4 ">
+        <div className="sm:p-7 p-4 text-lg leading-4">
           <ReactJson
             src={jsonPrev()}
             theme="tomorrow"

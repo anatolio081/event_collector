@@ -1,7 +1,8 @@
 import { axiosInstance } from "./axios";
 import { DateTime } from "luxon";
+import { AxiosResponse } from "axios";
 
-type EventsResposne = {
+type SessionResposne = {
     id: number
     name: string;
     created_at: any;
@@ -26,16 +27,17 @@ export class SessionModel {
 
     static async getList(query: SessionQuery): Promise<Array<SessionModel>> {
         let data = await axiosInstance.get("/sessions", {})
-        return data.data.map((item: EventsResposne) => {
+        return data.data.map((item: SessionResposne) => {
             const { id, name, created_at, events } = item;
             return new SessionModel(id, name, created_at, events);
         })
     }
 
-    static async createNew(name = "manual_front") {
-        let data = await axiosInstance.post("/newsession", {
+    static async createNew(name = "manual_front"): Promise<SessionResposne> {
+        let data: AxiosResponse<SessionResposne> = await axiosInstance.post("/newsession", {
             session_name: name
         })
+        return data.data;
     }
 
     static async delete(id: number) {

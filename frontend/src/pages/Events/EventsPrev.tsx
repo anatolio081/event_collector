@@ -1,9 +1,11 @@
 import React, { useMemo, useState } from "react";
+import CButton from "../../components/Forms/CButton";
 import CCheckBox from "../../components/Forms/CCheckBox";
 import CSelect from "../../components/Forms/CSelect";
 import { EventModel } from "../../models/Events";
 import { useAppSelector } from "../../store/hooks";
 import { EventPrevItem, EventPrevItemCompact } from "./EventPrevItem";
+import { ascend, descend, prop, sortWith } from "ramda";
 
 type EventsPrevProps = {
   events: Array<EventModel>;
@@ -23,9 +25,18 @@ function EventsPrev(props: EventsPrevProps) {
     mac_address: null,
   });
 
+  const [order, setOrder] = useState<{ [id: string]: any }>({
+    time: "desc",
+  });
+
   const selectEvent = (event: EventModel) => {
     props.selectEvent(event);
     setSelectId(event.id);
+  };
+
+  const setSortNewOnTop = (value: boolean) => {
+    order.time = value ? "desc" : "asc";
+    setOrder({ ...order });
   };
 
   const macList = () => {
@@ -68,14 +79,37 @@ function EventsPrev(props: EventsPrevProps) {
     }, cummulitive);
   };
 
+  const makeFilter = () => {
+    const filters = [];
+    for (const key in order) {
+      if (order[key] == "asc") {
+        filters.push(ascend(prop(key)));
+      } else {
+        filters.push(descend(prop(key)));
+      }
+    }
+    return sortWith(filters);
+  };
+
   const filterEvents = useMemo(() => {
-    return props.events.filter((item) => {
+    const events = props.events.filter((item) => {
       return (
         (filter.event_id === null || filter.event_id == item.event_id) &&
         (filter.mac_address === null || filter.mac_address == item.mac_address)
       );
     });
-  }, [props.events, filter]);
+    // @ts-expect-error
+    return makeFilter()(events) as Array<EventModel>;
+  }, [props.events, filter, order]);
+
+  const copyToClipBoard = () => {
+    const copy = filterEvents.reduce((acc, curr) => {
+      acc += `{ events: [ ${curr.json} ] }\n`;
+      return acc;
+    }, "");
+    navigator.clipboard.writeText(copy);
+  };
+
   return (
     <div className="xl:w-96 w-72 flex-shrink-0 border-r border-gray-800 h-full overflow-y-auto lg:block hidden p-5">
       <div className="flex items-center w-full">
@@ -113,20 +147,30 @@ function EventsPrev(props: EventsPrevProps) {
             }));
           }}
         />
-        <div className="mt-2">
-          <CSelect
-            items={macList()}
-            label="MAC"
-            callBack={(value: any) => {
-              setFilter((prevState) => ({
-                ...prevState,
-                mac_address: value,
-              }));
-            }}
-          />
-        </div>
       </div>
-
+      <div className="mt-2">
+        <CSelect
+          items={macList()}
+          label="MAC"
+          callBack={(value: any) => {
+            setFilter((prevState) => ({
+              ...prevState,
+              mac_address: value,
+            }));
+          }}
+        />
+      </div>
+      <div className="mt-2 flex items-center w-full">
+        <CButton onClick={copyToClipBoard}>Как текст</CButton>
+        <CCheckBox
+          value={order.time === "desc"}
+          label="Новые сверху"
+          className="ml-auto"
+          callBack={(value: boolean) => {
+            setSortNewOnTop(value);
+          }}
+        />
+      </div>
       {filterEvents.map((value, index) => {
         let deactiveClass =
           "p-3 mt-3 w-full flex flex-col rounded-md bg-gray-800 shadow";

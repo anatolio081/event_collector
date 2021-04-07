@@ -81,7 +81,7 @@ def api_new_session():
         "type": "current_session",
         "data": session.serialize
     }, room="current_session", namespace="/")
-    return "created"
+    return json.jsonify(session.serialize)
 
 
 @app.route("/web_show_from_raw", methods=['GET'])
