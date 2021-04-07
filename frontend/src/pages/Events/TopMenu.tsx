@@ -1,29 +1,45 @@
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAppSelector } from "../../store/hooks";
 import NewSession from "../../components/Controls/NewSession";
+import { useLocation, matchPath } from "react-router-dom";
 
-type TopMenuList = Array<{
+type TopMenuItem = {
   title: string;
   state: boolean;
   to: string;
-}>;
+};
 
 function TopMenu() {
+  const location = useLocation();
   const session = useAppSelector((state) => state.session.value);
 
-  const menus: TopMenuList = [
-    {
-      title: "Sessions",
-      state: true,
-      to: "/",
-    },
-  ];
+  const tabs = useAppSelector((state) => state.tab.value);
+
+  const fullMenus = useMemo(() => {
+    const menus: Array<TopMenuItem> = [
+      {
+        title: "Sessions",
+        state: location.pathname === "/",
+        to: "/",
+      },
+    ];
+
+    const items = tabs.map((item) => {
+      return {
+        title: item.name,
+        state: location.pathname === item.link,
+        to: item.link,
+      };
+    });
+    return menus.concat(items);
+    //location.pathname;
+  }, [tabs, location]);
 
   return (
     <div className="h-16 lg:flex w-full border-b border-gray-800 hidden px-10">
       <div className="flex h-full text-gray-400">
-        {menus.map((value, index) => {
+        {fullMenus.map((value, index) => {
           let deactiveClass =
             "cursor-pointer h-full border-b-2 border-transparent inline-flex items-center mr-8";
           let activeClass =

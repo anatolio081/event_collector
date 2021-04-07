@@ -25,6 +25,12 @@ export class SessionModel {
         this.created_at = DateTime.fromMillis(created_at);
     }
 
+    static async get(ses_id: number): Promise<SessionModel> {
+        let data: AxiosResponse<SessionResposne> = await axiosInstance.get(`/sessions/${ses_id}`);
+        const { id, name, created_at, events } = data.data;
+        return new SessionModel(id, name, created_at, events);
+    }
+
     static async getList(query: SessionQuery): Promise<Array<SessionModel>> {
         let data = await axiosInstance.get("/sessions", {})
         return data.data.map((item: SessionResposne) => {

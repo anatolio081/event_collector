@@ -32,7 +32,6 @@ with app.app_context():
 
 # инициализаруем базу
 collector = EventCollector(app)
-collector.create_log_file("manual")
 
 
 @socketio.on('join')
@@ -53,19 +52,10 @@ def on_disconect():
 @socketio.on('connect')
 def connect():
     join_room("current_session", sid=request.sid)
-    session = Session.query.get(collector.get_session_id())
-    emit('message', {"type": "current_session",
-                     'data': session.serialize})
-
-
-@app.route("/new_log", methods=['GET'])
-def new_log():
-    """
-    создать новый файл для логов
-    :return:
-    """
-    collector.create_log_file("manul_front")
-    return "created"
+    if collector.have_session():
+        session = Session.query.get(collector.get_session_id())
+        emit('message', {"type": "current_session",
+                         'data': session.serialize})
 
 
 @app.route("/api/newsession", methods=['POST'])
@@ -77,32 +67,7 @@ def api_new_session():
     name = request.json.get("session_name", "manul_front")
     session = collector.create_log_file(name)
     session = Session.query.get(session)
-    send({
-        "type": "current_session",
-        "data": session.serialize
-    }, room="current_session", namespace="/")
     return json.jsonify(session.serialize)
-
-
-@app.route("/web_show_from_raw", methods=['GET'])
-def wa_form():
-    """
-    отобразить форму для ввода данных с коллектора смартспая
-    :return:
-    """
-    return render_template("waform.html")
-
-
-@app.route("/web_event_files", methods=['GET'])
-def render_events():
-    """
-    показать веб-страницу с файлами логов
-    :return:
-    """
-    sessions = Session.query.all()  # можно сортонуть по времени
-
-    return render_template("sessionList.html",
-                           sessions=sessions)
 
 
 @app.route("/api/sessions", methods=['GET'])
@@ -116,10 +81,20 @@ def api_sessions():
     return json.jsonify([i.serialize for i in sessions])
 
 
+@app.route("/api/sessions/<int:session_id>", methods=['GET'])
+def api_sessions_get(session_id):
+    """
+    запрос одной сессии по id
+    :return:
+    """
+    session = Session.query.get(session_id)
+    return json.jsonify(session.serialize)
+
+
 @app.route("/api/sessions/<int:session_id>", methods=['DELETE'])
 def api_sessions_del(session_id):
     """
-    показать веб-страницу с файлами логов
+    удаляет страницу
     :return:
     """
     session = Session.query.get(session_id)
@@ -136,21 +111,6 @@ def api_current_sessions():
     :return:
     """
     return json.jsonify(collector.session.serialize)
-
-
-@app.route("/events_files_json", methods=['GET'])
-def events_raw():
-    """
-    вернуть список файлов в json
-    :return:
-    """
-    files = collector.get_files()
-    response = app.response_class(
-        response=json.dumps(files),
-        status=200,
-        mimetype='application/json'
-    )
-    return response
 
 
 @app.route("/api/events", methods=['GET'])

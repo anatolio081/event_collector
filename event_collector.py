@@ -5,11 +5,11 @@ import json
 from models.session import Session
 from models import db
 from models.event import Event
+from flask_socketio import send
 
 
 class EventCollector:
     session: Session
-    cached_session_id: int
 
     def __init__(self, app):
         self.session = None
@@ -36,11 +36,19 @@ class EventCollector:
             db.session.add(session)
             db.session.commit()
             self.session = session
-            self.cached_session_id = self.session.id
+
+            send({
+                "type": "current_session",
+                "data": session.serialize
+            }, room="current_session", namespace="/")
+
             return self.session.id
 
+    def have_session(self):
+        return self.session is not None
+
     def get_session_id(self):
-        return self.cached_session_id
+        return self.session.id
 
     def append_data(self, data):
         """
@@ -50,6 +58,9 @@ class EventCollector:
         events_ids = []
 
         with self.app.app_context():
+
+            if not self.have_session():
+                self.create_log_file("manual")
             # db.init_app(self.app) # иногда работает без неё иногда с ней
             # итерируем эвенты по одному
             for event in data['events']:

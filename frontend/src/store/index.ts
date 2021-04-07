@@ -1,14 +1,14 @@
 import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit'
 import sessionReducer from './session'
+import tabReducer from './tab'
 
 const store = configureStore({
     reducer: {
-        session: sessionReducer
+        session: sessionReducer,
+        tab: tabReducer
     },
     middleware: getDefaultMiddleware({
-        serializableCheck: {
-            ignoredActions: ['session/setSession'],
-        }
+        serializableCheck: false
     }),
     devTools: import.meta.env.MODE !== "development" ? false : true,
 })

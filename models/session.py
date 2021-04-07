@@ -11,11 +11,17 @@ class Session(db.Model):
     @property
     def serialize(self):
         """Return object data in easily serializable format"""
+
+        try:
+            count = len(self.events)
+        except:
+            count = 0
+
         return {
             'id': self.id,
             'created_at': dump_datetime(self.created_at),
             'name': self.name,
-            'events': len(self.events)  #TODO: гавнецо
+            'events': count  # TODO: гавнецо
         }
 
     def __repr__(self):

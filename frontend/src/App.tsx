@@ -5,6 +5,8 @@ import TopMenu from "./pages/Events/TopMenu";
 import Events from "./pages/Events/Event";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import Sessions from "./pages/Sessions/Sessions";
+// @ts-expect-error
+import SnackbarProvider from "react-simple-snackbar";
 
 import { useAppDispatch } from "./store/hooks";
 import { setSession } from "./store/session";
@@ -32,19 +34,21 @@ function App() {
   }, []);
 
   return (
-    <Router>
-      <div className="bg-gray-900 text-white h-screen flex overflow-hidden text-sm">
-        <Sidebar />
+    <SnackbarProvider>
+      <Router>
+        <div className="bg-gray-900 text-white h-screen flex overflow-hidden text-sm">
+          <Sidebar />
 
-        <div className="flex-grow overflow-hidden h-full flex flex-col">
-          <TopMenu></TopMenu>
-          <Switch>
-            <Route path="/sessions/:id" component={Events}></Route>
-            <Route path="/" component={Sessions}></Route>
-          </Switch>
+          <div className="flex-grow overflow-hidden h-full flex flex-col">
+            <TopMenu></TopMenu>
+            <Switch>
+              <Route path="/sessions/:id" component={Events}></Route>
+              <Route path="/" component={Sessions}></Route>
+            </Switch>
+          </div>
         </div>
-      </div>
-    </Router>
+      </Router>
+    </SnackbarProvider>
   );
 }
 

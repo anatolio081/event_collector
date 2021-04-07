@@ -6,7 +6,9 @@ import { EventModel } from "../../models/Events";
 import { RouteComponentProps } from "react-router";
 import { useParams } from "react-router-dom";
 import socket, { SocketData } from "../../socket";
-import { useAppSelector } from "../../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { replaceTab } from "../../store/tab";
+import { SessionModel } from "../../models/Session";
 
 interface MatchParams {
   id: string | undefined;
@@ -15,6 +17,7 @@ interface MatchParams {
 interface EventsStateProps extends RouteComponentProps<MatchParams> {}
 
 function Events() {
+  const dispatch = useAppDispatch();
   const session = useAppSelector((state) => state.session.value);
   const [events, setEvents] = useState<EventModel[]>([]);
   const [selectEvent, setSelectEvent] = useState<EventModel | null>(null);
@@ -67,6 +70,13 @@ function Events() {
   const initData = async () => {
     eventsIDs.clear();
     setSelectEvent(null);
+    const curSession = await SessionModel.get(sessionId);
+    dispatch(
+      replaceTab({
+        link: `/sessions/${curSession.id}`,
+        name: curSession.name,
+      })
+    );
     const data = await EventModel.getList({
       session: sessionId,
     });
@@ -112,7 +122,6 @@ function Events() {
   );
 }
 export default Events;
-
 /*
 <div className="sm:px-7 px-4 pt-1 flex flex-col w-full border-b bg-gray-900 text-white border-gray-800 sticky top-0">
           <div className="flex items-center space-x-3 sm:mt-7 mt-4">
