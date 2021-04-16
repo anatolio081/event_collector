@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import CButton from "../../components/Forms/CButton";
 import CCheckBox from "../../components/Forms/CCheckBox";
 import CSelect from "../../components/Forms/CSelect";
@@ -9,6 +9,7 @@ import { ascend, descend, prop, sortWith } from "ramda";
 
 // @ts-expect-error
 import { useSnackbar } from "react-simple-snackbar";
+import { useParams } from "react-router-dom";
 
 type EventsPrevProps = {
   events: Array<EventModel>;
@@ -16,21 +17,33 @@ type EventsPrevProps = {
   currentSession: number;
 };
 
-type ListItem = Array<{ value: string | number; name: string }>;
+type MatchParams = {
+  id: string | undefined;
+};
+
+type ListItem = Array<{ value: string | number | null; name: string }>;
 
 function EventsPrev(props: EventsPrevProps) {
   const session = useAppSelector((state) => state.session.value);
+  const { id } = useParams<MatchParams>();
 
   const [openSnack] = useSnackbar({
     position: "top-center",
   });
 
   const [compactView, setCompactView] = useState(true);
-  const [selectId, setSelectId] = useState(0);
+  const [selectId, setSelectId] = useState<number | string>(0);
   const [filter, setFilter] = useState({
     event_id: null,
     mac_address: null,
   });
+
+  useEffect(() => {
+    setFilter({
+      event_id: null,
+      mac_address: null,
+    });
+  }, [id]);
 
   const [order, setOrder] = useState<{ [id: string]: any }>({
     time: "desc",
@@ -49,8 +62,8 @@ function EventsPrev(props: EventsPrevProps) {
   const macList = () => {
     const cummulitive: ListItem = [
       {
-        value: "null",
-        name: "All",
+        value: null,
+        name: "Любой MAC",
       },
     ];
     const unique = new Set();
@@ -69,8 +82,8 @@ function EventsPrev(props: EventsPrevProps) {
   const eventsID = () => {
     const cummulitive: ListItem = [
       {
-        value: "null",
-        name: "All",
+        value: null,
+        name: "Любой EventID",
       },
     ];
     const unique = new Set();
@@ -111,11 +124,11 @@ function EventsPrev(props: EventsPrevProps) {
 
   const copyToClipBoard = () => {
     const copy = filterEvents.reduce((acc, curr) => {
-      acc += `{ events: [ ${curr.json} ] }\n`;
+      acc += `{ "events": [ ${curr.json} ] }\n`;
       return acc;
     }, "");
     navigator.clipboard.writeText(copy);
-    openSnack("Текст скопирован в буфер", 100000);
+    openSnack("Текст скопирован в буфер", 3000);
   };
 
   return (
@@ -144,30 +157,26 @@ function EventsPrev(props: EventsPrevProps) {
           )}
         </div>
       </div>
-      <div className="relative mt-2">
-        <CSelect
-          items={eventsID()}
-          label="Event ID"
-          callBack={(value: any) => {
-            setFilter((prevState) => ({
-              ...prevState,
-              event_id: value,
-            }));
-          }}
-        />
-      </div>
-      <div className="mt-2">
-        <CSelect
-          items={macList()}
-          label="MAC"
-          callBack={(value: any) => {
-            setFilter((prevState) => ({
-              ...prevState,
-              mac_address: value,
-            }));
-          }}
-        />
-      </div>
+      <CSelect
+        items={eventsID()}
+        value={filter.event_id}
+        callBack={(value: any) => {
+          setFilter((prevState) => ({
+            ...prevState,
+            event_id: value,
+          }));
+        }}
+      />
+      <CSelect
+        items={macList()}
+        value={filter.mac_address}
+        callBack={(value: any) => {
+          setFilter((prevState) => ({
+            ...prevState,
+            mac_address: value,
+          }));
+        }}
+      />
       <div className="mt-2 flex items-center w-full">
         <CButton onClick={copyToClipBoard}>Как текст</CButton>
         <CCheckBox

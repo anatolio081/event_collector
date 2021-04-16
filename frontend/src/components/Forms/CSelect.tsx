@@ -4,17 +4,17 @@ import { CheckIcon, SelectorIcon } from "@heroicons/react/solid";
 
 type ListItem = {
   name: string;
-  value: string | number;
+  value: string | number | null;
 };
 
 type CSelectProps = {
   items: Array<ListItem>;
-  label: string;
   callBack: Function;
+  value?: any;
 };
 
 const CSelect = (props: CSelectProps) => {
-  const { label = "Label", callBack = (value: any) => {}, items } = props;
+  const { callBack = (value: any) => {}, items, value } = props;
   const [selected, setSelected] = useState(items[0]);
 
   useEffect(() => {
@@ -22,9 +22,14 @@ const CSelect = (props: CSelectProps) => {
     find ? setSelected(find) : null;
   }, [items]);
 
+  useEffect(() => {
+    const need = items.find((item) => item.value === value);
+    need ? setSelected(need) : null;
+  }, [value]);
+
   const setValue = (val: ListItem) => {
     setSelected(val);
-    callBack(val.value === "null" ? null : val.value);
+    callBack(val.value);
   };
 
   return (

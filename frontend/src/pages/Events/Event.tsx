@@ -14,13 +14,31 @@ interface MatchParams {
   id: string | undefined;
 }
 
-interface EventsStateProps extends RouteComponentProps<MatchParams> {}
+export const useEvents = () => {
+  const [selectEvent, setSelectEvent] = useState<EventModel | null>(null);
+
+  const jsonPrev = () => {
+    if (selectEvent) {
+      const temp = selectEvent;
+      return {
+        events: [JSON.parse(temp.json)],
+      };
+    }
+    return ["Событие не выбрано"];
+  };
+
+  const selectEventCallback = (event: EventModel) => {
+    setSelectEvent(event);
+  };
+
+  return { selectEvent, setSelectEvent, jsonPrev, selectEventCallback };
+};
 
 function Events() {
   const dispatch = useAppDispatch();
   const session = useAppSelector((state) => state.session.value);
   const [events, setEvents] = useState<EventModel[]>([]);
-  const [selectEvent, setSelectEvent] = useState<EventModel | null>(null);
+  const { setSelectEvent, jsonPrev, selectEventCallback } = useEvents();
   const { id } = useParams<MatchParams>();
   const sessionId = id ? parseInt(id) : 0;
   let watchEvents: boolean | string = false;
@@ -73,6 +91,7 @@ function Events() {
     const curSession = await SessionModel.get(sessionId);
     dispatch(
       replaceTab({
+        id: curSession.id,
         link: `/sessions/${curSession.id}`,
         name: curSession.name,
       })
@@ -84,20 +103,6 @@ function Events() {
       eventsIDs.add(event.id);
     }
     setEvents(data);
-  };
-
-  const jsonPrev = () => {
-    if (selectEvent) {
-      const temp = selectEvent;
-      return {
-        events: [JSON.parse(temp.json)],
-      };
-    }
-    return ["Событие не выбрано"];
-  };
-
-  const selectEventCallback = (event: EventModel) => {
-    setSelectEvent(event);
   };
 
   return (

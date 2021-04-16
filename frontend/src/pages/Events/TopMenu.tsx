@@ -1,20 +1,30 @@
-import React, { useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
-import { useAppSelector } from "../../store/hooks";
+import React, { useMemo } from "react";
+import { Link, useHistory, useParams } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import NewSession from "../../components/Controls/NewSession";
-import { useLocation, matchPath } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { XIcon, DocumentAddIcon } from "@heroicons/react/outline";
+import { useParseModal } from "../../components/Modals/ParseModal";
+import { removeTab } from "../../store/tab";
+
+type MatchParams = {
+  id: string | undefined;
+};
 
 type TopMenuItem = {
   title: string;
   state: boolean;
   to: string;
+  id: string | number;
 };
 
 function TopMenu() {
+  const dispatch = useAppDispatch();
   const location = useLocation();
   const session = useAppSelector((state) => state.session.value);
-
+  const [showModal] = useParseModal();
   const tabs = useAppSelector((state) => state.tab.value);
+  const history = useHistory();
 
   const fullMenus = useMemo(() => {
     const menus: Array<TopMenuItem> = [
@@ -22,6 +32,7 @@ function TopMenu() {
         title: "Sessions",
         state: location.pathname === "/",
         to: "/",
+        id: "0",
       },
     ];
 
@@ -30,20 +41,29 @@ function TopMenu() {
         title: item.name,
         state: location.pathname === item.link,
         to: item.link,
+        id: item.id,
       };
     });
     return menus.concat(items);
-    //location.pathname;
   }, [tabs, location]);
+
+  const removeTabCall = (delid: string | number) => {
+    const rem = fullMenus.find((item) => item.id == delid);
+    dispatch(removeTab(delid));
+    if (rem?.state) {
+      history.push("/");
+    }
+  };
+
+  const deactiveClass =
+    "cursor-pointer h-full border-b-2 border-transparent inline-flex items-center mr-8";
+  const activeClass =
+    "cursor-pointer h-full border-b-2 text-white border-white inline-flex mr-8 items-center";
 
   return (
     <div className="h-16 lg:flex w-full border-b border-gray-800 hidden px-10">
       <div className="flex h-full text-gray-400">
         {fullMenus.map((value, index) => {
-          let deactiveClass =
-            "cursor-pointer h-full border-b-2 border-transparent inline-flex items-center mr-8";
-          let activeClass =
-            "cursor-pointer h-full border-b-2 text-white border-white inline-flex mr-8 items-center";
           return (
             <Link
               to={value.to}
@@ -51,10 +71,33 @@ function TopMenu() {
               className={value.state ? activeClass : deactiveClass}
             >
               {value.title}
+              {value.to !== "/" ? (
+                <XIcon
+                  className="h-5 w-5 text-red-500"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.nativeEvent.stopImmediatePropagation();
+                    event.nativeEvent.stopPropagation();
+                    event.nativeEvent.preventDefault();
+                    removeTabCall(value.id);
+                    return false;
+                  }}
+                />
+              ) : null}
             </Link>
           );
         })}
+
+        <button
+          className={`${deactiveClass} focus:outline-none`}
+          onClick={showModal}
+        >
+          Распарсить
+          <DocumentAddIcon className="h-5 w-5 text-green-500" />
+        </button>
       </div>
+
       <div className="ml-auto flex items-center space-x-7">
         {session == null ? (
           <p>Нет сесси</p>
