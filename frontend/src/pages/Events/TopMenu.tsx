@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Link, useHistory, useParams } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import NewSession from "../../components/Controls/NewSession";
 import { useLocation } from "react-router-dom";

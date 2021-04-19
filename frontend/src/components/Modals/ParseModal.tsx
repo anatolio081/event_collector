@@ -1,11 +1,9 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { useModal } from "react-modal-hook";
 import Modal from "../Modal";
 import CButton from "../../components/Forms/CButton";
 import { ExclamationIcon } from "@heroicons/react/outline";
 
-// @ts-expect-error
-import { useSnackbar } from "react-simple-snackbar";
 import { replaceTab } from "../../store/tab";
 import { useAppDispatch } from "../../store/hooks";
 import { v4 as uuidv4 } from "uuid";

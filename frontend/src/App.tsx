@@ -2,9 +2,11 @@ import React, { useEffect } from "react";
 import "./App.css";
 import Sidebar from "./components/Sidebar";
 import TopMenu from "./pages/Events/TopMenu";
-import Events from "./pages/Events/Event";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import Events from "./pages/Events/Event";
 import Sessions from "./pages/Sessions/Sessions";
+import RawEvents from "./pages/Events/RawEvent";
+
 // @ts-expect-error
 import SnackbarProvider from "react-simple-snackbar";
 import { TransitionGroup } from "react-transition-group";
@@ -14,7 +16,6 @@ import { useAppDispatch } from "./store/hooks";
 import { setSession } from "./store/session";
 import { SessionModel } from "./models/Session";
 import socket, { SocketData } from "./socket";
-import RawEvents from "./pages/Events/RawEvent";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -37,8 +38,8 @@ function App() {
   }, []);
 
   return (
-    <SnackbarProvider>
-      <ModalProvider rootComponent={TransitionGroup}>
+    <ModalProvider rootComponent={TransitionGroup}>
+      <SnackbarProvider>
         <Router>
           <div className="bg-gray-900 text-white h-screen flex overflow-hidden text-sm">
             <Sidebar />
@@ -53,8 +54,8 @@ function App() {
             </div>
           </div>
         </Router>
-      </ModalProvider>
-    </SnackbarProvider>
+      </SnackbarProvider>
+    </ModalProvider>
   );
 }
 
