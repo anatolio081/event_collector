@@ -19,15 +19,6 @@ const manager = new Manager(baseUrl, {
     transports: ['polling'],
     autoConnect: false,
 });
-/*
-const socket = io("", {
-    //reconnectionDelayMax: 10000,
-    //extraHeaders: {
-    //    "Access-Control-Allow-Origin": "*",
-    //},
-    //transports: ["polling", "websocket"],
-});
-*/
 const socket = manager.socket("/");
 
 export default socket

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import CButton from "../../components/Forms/CButton";
 import { SessionModel } from "../../models/Session";
-// @ts-expect-error
+/* @ts-expect-error */
 import { useSnackbar } from "react-simple-snackbar";
 
 function Sessions() {

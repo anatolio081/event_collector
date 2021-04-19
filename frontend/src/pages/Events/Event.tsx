@@ -84,7 +84,6 @@ function Events() {
     }
   });
 
-  // init data
   const initData = async () => {
     eventsIDs.clear();
     setSelectEvent(null);

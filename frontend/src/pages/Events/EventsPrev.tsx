@@ -7,7 +7,7 @@ import { useAppSelector } from "../../store/hooks";
 import { EventPrevItem, EventPrevItemCompact } from "./EventPrevItem";
 import { ascend, descend, prop, sortWith } from "ramda";
 
-// @ts-expect-error
+/* @ts-expect-error */
 import { useSnackbar } from "react-simple-snackbar";
 import { useParams } from "react-router-dom";
 
@@ -118,7 +118,7 @@ function EventsPrev(props: EventsPrevProps) {
         (filter.mac_address === null || filter.mac_address == item.mac_address)
       );
     });
-    // @ts-expect-error
+    /* @ts-expect-error */
     return makeFilter()(events) as Array<EventModel>;
   }, [props.events, filter, order]);
 

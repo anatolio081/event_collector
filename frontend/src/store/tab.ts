@@ -2,9 +2,6 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { findIndex, propEq } from 'ramda'
 import { RootState } from './index'
 
-// highlight-start
-// Define a type for the slice state
-
 type Tab = {
     id: string | number;
     name: string;
@@ -23,15 +20,14 @@ type TabPayload = {
     data?: any;
 }
 
-// Define the initial state using that type
+
 const initialState: TabState = {
     value: []
 }
-// highlight-end
+
 
 export const tabSlice = createSlice({
     name: 'session',
-    // `createSlice` will infer the state type from the `initialState` argument
     initialState,
     reducers: {
         replaceTab: (state, action: PayloadAction<TabPayload>) => {

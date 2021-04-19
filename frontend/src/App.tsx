@@ -7,11 +7,6 @@ import Events from "./pages/Events/Event";
 import Sessions from "./pages/Sessions/Sessions";
 import RawEvents from "./pages/Events/RawEvent";
 
-// @ts-expect-error
-import SnackbarProvider from "react-simple-snackbar";
-import { TransitionGroup } from "react-transition-group";
-import { ModalProvider } from "react-modal-hook";
-
 import { useAppDispatch } from "./store/hooks";
 import { setSession } from "./store/session";
 import { SessionModel } from "./models/Session";
@@ -38,24 +33,20 @@ function App() {
   }, []);
 
   return (
-    <ModalProvider rootComponent={TransitionGroup}>
-      <SnackbarProvider>
-        <Router>
-          <div className="bg-gray-900 text-white h-screen flex overflow-hidden text-sm">
-            <Sidebar />
+    <Router>
+      <div className="bg-gray-900 text-white h-screen flex overflow-hidden text-sm">
+        <Sidebar />
 
-            <div className="flex-grow overflow-hidden h-full flex flex-col">
-              <TopMenu></TopMenu>
-              <Switch>
-                <Route path="/sessions/:id" component={Events}></Route>
-                <Route path="/raw-sessions/:id" component={RawEvents}></Route>
-                <Route path="/" component={Sessions}></Route>
-              </Switch>
-            </div>
-          </div>
-        </Router>
-      </SnackbarProvider>
-    </ModalProvider>
+        <div className="flex-grow overflow-hidden h-full flex flex-col">
+          <TopMenu></TopMenu>
+          <Switch>
+            <Route path="/sessions/:id" component={Events}></Route>
+            <Route path="/raw-sessions/:id" component={RawEvents}></Route>
+            <Route path="/" component={Sessions}></Route>
+          </Switch>
+        </div>
+      </div>
+    </Router>
   );
 }
 
