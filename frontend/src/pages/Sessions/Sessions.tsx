@@ -2,14 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import CButton from "../../components/Forms/CButton";
 import { SessionModel } from "../../models/Session";
-/* @ts-expect-error */
-import { useSnackbar } from "react-simple-snackbar";
 
 function Sessions() {
-  const [openSnack] = useSnackbar({
-    position: "top-center",
-  });
-
   const [sessions, setSessions] = useState<SessionModel[]>([]);
 
   useEffect(() => {
@@ -31,7 +25,7 @@ function Sessions() {
     await SessionModel.delete(id);
     const [del] = sessions.splice(index, 1);
     setSessions(sessions);
-    openSnack(`Сессия '${del.name}' удалена`, 3000);
+    // тут был снекбар
   };
 
   return (

@@ -21,7 +21,6 @@
     "react-modal-hook": "^3.0.0",
     "react-redux": "^7.2.2",
     "react-router-dom": "^5.2.0",
-    "react-simple-snackbar": "^1.1.11",
     "react-transition-group": "^4.4.1",
     "socket.io-client": "^4.0.1",
     "uuid": "^8.3.2",
