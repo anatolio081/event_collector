@@ -8,6 +8,8 @@ import { EventPrevItem, EventPrevItemCompact } from "./EventPrevItem";
 import { ascend, descend, prop, sortWith } from "ramda";
 
 import { useParams } from "react-router-dom";
+/** @ts-expect-error */
+import { useSnackbar } from "@brancol/react-snackbar";
 
 type EventsPrevProps = {
   events: Array<EventModel>;
@@ -24,7 +26,7 @@ type ListItem = Array<{ value: string | number | null; name: string }>;
 function EventsPrev(props: EventsPrevProps) {
   const session = useAppSelector((state) => state.session.value);
   const { id } = useParams<MatchParams>();
-
+  const snackbar = useSnackbar();
   const [compactView, setCompactView] = useState(true);
   const [selectId, setSelectId] = useState<number | string>(0);
   const [filter, setFilter] = useState({
@@ -122,7 +124,7 @@ function EventsPrev(props: EventsPrevProps) {
       return acc;
     }, "");
     navigator.clipboard.writeText(copy);
-    // тут был снекбар
+    snackbar.showSuccess("Текст скопирован");
   };
 
   return (
