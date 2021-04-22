@@ -2,12 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import CButton from "../../components/Forms/CButton";
 import { SessionModel } from "../../models/Session";
-/** @ts-expect-error */
-import { useSnackbar } from "@brancol/react-snackbar";
+
+import { toast } from "react-toastify";
 
 function Sessions() {
   const [sessions, setSessions] = useState<SessionModel[]>([]);
-  const snackbar = useSnackbar();
 
   useEffect(() => {
     initData();
@@ -27,8 +26,8 @@ function Sessions() {
   const deleteSession = async (id: number, index: number) => {
     await SessionModel.delete(id);
     const [del] = sessions.splice(index, 1);
-    setSessions(sessions);
-    snackbar.showSuccess(`Сессия '${del.name}' удалена`);
+    toast.success(`Сессия '${del.name}' удалена`);
+    setSessions([...sessions]);
   };
 
   return (

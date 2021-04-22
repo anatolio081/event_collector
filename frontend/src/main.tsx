@@ -8,19 +8,13 @@ import store from "./store";
 
 import { TransitionGroup } from "react-transition-group";
 import { ModalProvider } from "react-modal-hook";
-/** @ts-expect-error*/
-import SnackbarProvider from "@brancol/react-snackbar";
 
+        
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
       <ModalProvider rootComponent={TransitionGroup}>
-        <SnackbarProvider
-          successColor="rgb(16, 185, 129)"
-          dangerColor="rgba(239, 68, 68)"
-        >
-          <App />
-        </SnackbarProvider>
+        <App />
       </ModalProvider>
     </Provider>
   </React.StrictMode>,
