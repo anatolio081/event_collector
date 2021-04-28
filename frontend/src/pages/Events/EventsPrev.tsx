@@ -9,6 +9,7 @@ import { ascend, descend, prop, sortWith } from "ramda";
 
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { copyToClipboard } from "../../utils/copyToClipboard";
 
 type EventsPrevProps = {
   events: Array<EventModel>;
@@ -121,7 +122,7 @@ function EventsPrev(props: EventsPrevProps) {
       acc += `{ "events": [ ${curr.json} ] }\n`;
       return acc;
     }, "");
-    navigator.clipboard.writeText(copy);
+    copyToClipboard(copy);
     toast.info("Текст скопирован");
   };
 
